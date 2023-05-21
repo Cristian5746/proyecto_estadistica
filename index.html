@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculadora de distribución uniforme</title>
+    <style>
+        body {
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #2196F3;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0D47A1;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+
+        .resultados {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+
+        .resultados label {
+            font-weight: normal;
+            display: inline-block;
+            width: 100px;
+            margin-right: 10px;
+        }
+
+        .resultados span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de distribución uniforme</h1>
+
+        <label for="minimo">Valor mínimo:</label>
+        <input type="number" id="minimo" name="minimo">
+
+        <label for="maximo">Valor máximo:</label>
+        <input type="number" id="maximo" name="maximo">
+
+        <label for="cola">Cola (izquierda o derecha):</label>
+        <select id="cola" name="cola">
+            <option value="izquierda">Izquierda</option>
+            <option value="derecha">Derecha</option>
+        </select>
+
+        <button onclick="calcular()">Calcular</button>
+
+        <canvas id="grafica"></canvas>
+
+        <div class="resultados">
+            <label>Media:</label>
+            <span id="media"></span><br>
+
+            <label>Varianza:</label>
+            <span id="varianza"></span><br>
+
+            <label>Desviación estándar:</label>
+            <span id="desviacion"></span><br>
+
+            <label>Probabilidad:</label>
+            <span id="probabilidad"></span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script>
+        function calcular() {
+            // Obtener los valores de los campos de entrada
+            var minimo = parseInt(document.getElementById('minimo').value);
+            var maximo = parseInt(document.getElementById('maximo').value);
+            var cola = document.getElementById('cola').value;
+
+            // Crear un array con los valores de la distribución uniforme
+            var data = [];
+            var labels = [];
+            for (var i = minimo; i <= maximo; i++) {
+                data.push(i);
+                labels.push(i.toString());
+            }
+
+            // Ajustar los datos según la cola seleccionada
+            if (cola === 'izquierda') {
+                var corte = Math.floor(minimo + (maximo - minimo + 1) / 2);
+                data = data.slice(0, corte);
+                labels = labels.slice(0, corte);
+            } else if (cola === 'derecha') {
+                var corte = Math.ceil(minimo + (maximo - minimo + 1) / 2);
+                data = data.slice(corte - minimo);
+                labels = labels.slice(corte - minimo);
+            }
+
+            // Crear el dataset para la gráfica de línea
+            var
+            dataset = {
+                data: data,
+                backgroundColor: '#2196F3',
+                borderColor: '#2196F3',
+                borderWidth: 1,
+                label: 'Distribución Uniforme'
+            };
+
+            // Crear el objeto de configuración de la gráfica
+            var chartConfig = {
+                type: 'bar',
+                data: {
+                    datasets: [dataset],
+                    labels: labels
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            };
+
+            // Crear la instancia de la gráfica
+            var ctx = document.getElementById('grafica').getContext('2d');
+            var myChart = new Chart(ctx, chartConfig);
+
+            // Calcular la media, varianza y desviación estándar
+            var media = (minimo + maximo) / 2;
+            var varianza = Math.pow(maximo - minimo + 1, 2) / 12;
+            var desviacion = Math.sqrt(varianza);
+
+            // Mostrar los resultados
+            document.getElementById('media').innerText = media.toFixed(2);
+            document.getElementById('varianza').innerText = varianza.toFixed(2);
+            document.getElementById('desviacion').innerText = desviacion.toFixed(2);
+
+            // Calcular y mostrar la probabilidad
+            var probabilidad = 1 / (maximo - minimo + 1);
+            document.getElementById('probabilidad').innerText = probabilidad.toFixed(2);
+        }
+    </script>
+</body>
+</html>
